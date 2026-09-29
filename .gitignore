@@ -1,0 +1,12 @@
+# Bi mat va du lieu chay thu
+config.toml
+data/
+tools/
+# Build firmware
+firmware/.pio/
+report/figures/_crop_*
+# File khoa tam cua Word/Office
+~$*
+__pycache__/
+*.pyc
+.venv/

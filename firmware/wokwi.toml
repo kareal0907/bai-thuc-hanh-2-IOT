@@ -1,0 +1,6 @@
+[wokwi]
+version = 1
+firmware = '.pio/build/esp32dev/firmware.bin'
+elf = '.pio/build/esp32dev/firmware.elf'
+# Serial cua ESP32 mo phong xuat ra cong TCP (RFC2217) de ghi log: pio device monitor -p rfc2217://localhost:4003
+rfc2217ServerPort = 4003

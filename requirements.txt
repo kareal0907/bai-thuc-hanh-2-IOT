@@ -1,0 +1,8 @@
+paho-mqtt>=2.1
+influxdb-client>=1.44
+pandas>=2.2
+numpy>=1.26
+scikit-learn>=1.5
+streamlit>=1.37
+plotly>=5.20
+matplotlib>=3.8

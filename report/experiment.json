@@ -1,0 +1,171 @@
+{
+  "date": "29/09/2026",
+  "stop": "2026-09-29T07:34:41Z",
+  "wokwi_speed": 0.984,
+  "wokwi_speed_overall": 0.954,
+  "esp_clock_offset_ms": 2029.0,
+  "latency": {
+    "sim": {
+      "n": 519,
+      "ingest_p50": 462.0,
+      "write_mean": 7.518304431599229,
+      "e2e_p50": 469.0,
+      "e2e_p95": 1758.1999999999998,
+      "e2e_p99": 3619.5600000000177,
+      "e2e_max": 9708.0
+    },
+    "esp_before": {
+      "n": 93,
+      "ingest_p50": 3062.0,
+      "write_mean": 9.129032258064516,
+      "e2e_p50": 3073.0,
+      "e2e_p95": 5581.5999999999985,
+      "e2e_p99": 8363.72,
+      "e2e_max": 9177.0
+    },
+    "esp_after": {
+      "n": 219,
+      "ingest_p50": 2609.0,
+      "write_mean": 5.1826484018264845,
+      "e2e_p50": 2614.0,
+      "e2e_p95": 3572.6,
+      "e2e_p99": 4550.78,
+      "e2e_max": 5214.0
+    }
+  },
+  "latency_rows": [
+    [
+      "sim-01 (thiết bị Python, cùng đồng hồ)",
+      "sim"
+    ],
+    [
+      "esp32-01 – NTP chỉ 1 lần",
+      "esp_before"
+    ],
+    [
+      "esp32-01 – NTP mỗi 60 s",
+      "esp_after"
+    ]
+  ],
+  "esp_before_backfill": 97,
+  "fault": {
+    "s1_samples": 9,
+    "s1_seq": [
+      104,
+      113
+    ],
+    "s1_missing": [
+      108
+    ],
+    "s1_redelivered": 12,
+    "s1_max_ingest": 52849.0,
+    "s2_samples": 13,
+    "s2_seq": [
+      129,
+      142
+    ],
+    "s2_missing": [
+      130
+    ]
+  },
+  "preprocess_window": "toàn bộ buổi thực nghiệm, 06:47–07:34 UTC",
+  "setup_text": "Pipeline chạy liên tục khoảng 47 phút trên một máy tính cá nhân (Windows 11, InfluxDB chạy cục bộ), qua broker công cộng broker.emqx.io; RTT TCP tới broker có p50 = 256 ms. Có 2 nguồn dữ liệu chạy đồng thời. Thứ nhất là esp32-01, firmware thật chạy trên Wokwi (VS Code); các thanh trượt cảm biến được chỉnh tay nên dữ liệu gần như là hằng số. Thứ hai là sim-01, thiết bị Python chu kỳ 5 s với tín hiệu hình sin cộng nhiễu, chèn lỗi có chủ đích: mất 2 % số gói, trùng 2 %, null 2 %, spike 1,5 %, payload hỏng 1 %, đến trễ 1 %. Độ trễ chỉ thống kê trên mẫu live, bỏ qua mẫu gửi bù hoặc đến sai thứ tự.",
+  "preprocess_comment": "Với sim-01, lưới 5 s có 560 ô, trong đó 22 ô thiếu nhiệt độ; các ô này tương ứng với gói bị mất, bản tin hỏng bị loại và giá trị null. Phương pháp Z-score trượt phát hiện 5 outlier, còn IQR phát hiện 4. Cả hai đều bắt được các spike nhiệt độ (bị nhân 1,6 hoặc 0,4 lần). Sau khi nội suy các khoảng trống ngắn, dữ liệu sim-01 không còn giá trị thiếu và được gom thành 48 cửa sổ 1 phút. Với esp32-01, 84/478 ô vẫn thiếu sau xử lý. Đó là các lần mô phỏng khởi động lại hoặc tạm dừng khi tab Wokwi bị ẩn, kéo dài hơn 30 s, nên cố ý không nội suy; completeness của các cửa sổ này thấp. Khi độ ẩm trên Wokwi được chỉnh từ 50 lên 71,5 %, IQR toàn khoảng đánh dấu nhầm 85 mẫu mức mới là outlier, vì IQR của tín hiệu gần như hằng số xấp xỉ 0. Z-score trượt không đánh dấu mẫu nào: độ lệch chuẩn cục bộ tăng ngay tại bước nhảy. Đây là lý do chọn Z-score trượt làm mặc định. Z-score chuẩn hóa cũng khuếch đại nhiễu lượng tử 0,02 cm của khoảng cách thành ±2σ, nên cần thận trọng khi chuẩn hóa tín hiệu gần như không đổi.",
+  "fault_rows": [
+    [
+      "Gateway (collector) dừng 60 s",
+      "Khi kết nối lại, broker báo session_present=True và giao lại 12 bản tin QoS1 đã giữ trong lúc gateway tắt (độ trễ tối đa 52.849 ms). Trong khoảng 60 s đó, sim-01 lưu 9 mẫu (seq 104–113). Seq thiếu [108] đã được ghi nhận là sự kiện gap; nhiều khả năng đó là gói bị chèn lỗi mất (2 %), vì mọi bản tin publish trong lúc gateway dừng đều được giao lại."
+    ],
+    [
+      "InfluxDB dừng 60 s",
+      "Lần ghi đầu tiên lỗi (connection refused) → chuyển sang spool.jsonl. Collector ghi tạm 27 bản ghi. Sau khi DB khởi động lại, lần kiểm tra kế tiếp tự ghi bù cả 27 bản ghi. Trong cửa sổ này sim-01 có 13 mẫu (seq 129–142). Seq thiếu [130] là gap phát sinh trước khi tới gateway, nên không có mẫu nào bị mất do DB lỗi."
+    ],
+    [
+      "ESP32 khởi động lại (4 lần ghi nhận, do nạp firmware mới hoặc chỉnh mô phỏng)",
+      "seq quay về 1 nhưng ts mới hơn → gateway ghi sự kiện reset, không nhầm với dữ liệu trùng hay đến trễ. LWT phát status=offline cho phiên cũ."
+    ],
+    [
+      "Payload hỏng, trùng lặp, đến trễ (sim-01)",
+      "Bản tin hỏng bị loại (bad_json, device_id_mismatch). Bản trùng bị cache LRU chặn. Gói đến trễ được ghi đúng timestamp gốc và gắn delivery=late. Mọi sự kiện đều có trong iot_ops/data_quality (Bảng 6)."
+    ]
+  ],
+  "analysis": [
+    [
+      "Độ trễ end-to-end.",
+      "Với sim-01 (cùng đồng hồ với gateway), E2E p50 = 469 ms, trong đó chặng thiết bị → broker → gateway chiếm gần hết (ingest p50 = 462 ms). Xử lý tại gateway dưới 1 ms và ghi InfluxDB trung bình 7,5 ms. Như vậy nút cổ chai là mạng: mỗi bản tin đi hai chặng tới broker công cộng ở xa (broker.emqx.io phân giải tới máy chủ AWS ở Mỹ/châu Âu, RTT p50 = 256 ms), cộng thời gian broker chuyển tiếp. Đuôi phân bố (p95 = 1.758 ms, max = 9.708 ms) xuất hiện quanh thời điểm gateway kết nối lại và vào các lúc broker công cộng chậm."
+    ],
+    [
+      "Đồng bộ thời gian là điều kiện để đo đúng.",
+      "Khi chạy liên tục, Wokwi đạt khoảng 98% tốc độ thực. Tuy nhiên mô phỏng tạm dừng khi tab bị ẩn, nên tính trên cả phiên thì đồng hồ ESP32 chỉ chạy được 95% thời gian thực. Với firmware ban đầu (chỉ đồng bộ NTP khi khởi động), độ lệch này tích lũy: \"độ trễ\" đo được tăng tới hàng chục giây, 97 mẫu bị phân loại nhầm là gửi bù, và timestamp trong DB bị lệch theo. Sau khi đồng bộ lại NTP mỗi 60 s, E2E p50 của ESP32 còn 2.614 ms (p95 = 3.573 ms). So sánh thời điểm dòng Serial tới máy tính với ts của thiết bị cho thấy đồng hồ ESP32 vẫn chậm hơn máy tính khoảng 2.029 ms (sai số NTP qua mạng ảo của Wokwi). Trừ phần này, độ trễ mạng thực của ESP32 còn khoảng 585 ms, cùng cỡ với sim-01. Kết luận: phép đo E2E giữa hai đồng hồ khác nhau chỉ chính xác tới mức sai số đồng bộ. Thiết bị thật dùng NTP có sai số vài chục ms; khi cần chính xác hơn, nên dùng PTP hoặc so sánh bằng timestamp tại gateway."
+    ],
+    [
+      "Lưu trữ.",
+      "Ghi đồng bộ từng điểm chỉ đạt khoảng 460 điểm/s vì mỗi lần ghi là một HTTP request. Ghi theo lô 5.000 điểm đạt khoảng 38.146 điểm/s. Với tải hiện tại (0,2–0,4 bản tin/s) ghi đồng bộ là đủ và cho độ trễ thấp nhất; khi số thiết bị tăng, nên dùng batching (ví dụ 500 điểm hoặc 1 s mỗi lô). Sau khi nén TSM, mỗi giá trị field của iot_raw chiếm khoảng 4,9 B (benchmark: 3,1 B), tức khoảng 34 B cho mỗi mẫu 7 field. Một thiết bị gửi mỗi 5 s tạo khoảng 17.280 mẫu/ngày, tức chưa tới 1 MB/ngày, nên raw 30 ngày của hàng trăm thiết bị vẫn nhỏ. Chi phí cố định đáng kể lại là các file series/index cấp phát trước, khoảng 32 MB mỗi bucket. Dữ liệu 1 phút đã xử lý có số điểm ít hơn khoảng 12 lần, nên việc giữ raw 30 ngày và processed 1 năm là cân đối. Rủi ro cần tránh là cardinality: không đưa seq, ts hay giá trị liên tục vào tag."
+    ],
+    [
+      "Tính toàn vẹn.",
+      "Chuỗi seq giúp đo chính xác tỉ lệ nhận và phân biệt 4 loại sự cố: mất gói, trùng, đến trễ, khởi động lại. Timestamp của thiết bị kết hợp với series (device_id, site) làm cho việc ghi lại (spool, QoS1 redelivery, chạy lại tiền xử lý) là idempotent. Điểm yếu còn lại là PubSubClient chỉ publish QoS0: gói mất giữa ESP32 và broker không được gửi lại, mà chỉ được phát hiện qua gap."
+    ]
+  ],
+  "improvements": [
+    [
+      "Bảo mật:",
+      "dùng broker riêng (Mosquitto/EMQX) với TLS 8883, username/password hoặc chứng chỉ client, ACL theo topic; broker công cộng chỉ phù hợp để thực hành."
+    ],
+    [
+      "QoS1 ở thiết bị:",
+      "dùng thư viện hỗ trợ QoS1 (ví dụ esp-mqtt/AsyncMqttClient) và lưu bộ đệm vào flash/LittleFS để không mất dữ liệu khi mất điện."
+    ],
+    [
+      "Hiệu năng ghi:",
+      "batching bất đồng bộ theo kích thước hoặc thời gian; đặt broker và gateway gần nhau (LAN/edge) để giảm độ trễ vài trăm ms xuống vài ms."
+    ],
+    [
+      "Tiền xử lý:",
+      "chuyển phần downsampling đơn giản sang Flux task (aggregateWindow) chạy ngay trong InfluxDB; cập nhật scaler theo cửa sổ trượt để phục vụ phát hiện bất thường real-time."
+    ],
+    [
+      "Vận hành:",
+      "chạy các thành phần bằng docker compose hoặc dịch vụ Windows, thêm cảnh báo khi completeness thấp hoặc thiết bị offline."
+    ]
+  ],
+  "difficulties": [
+    [
+      "Tải thư viện từ PyPI rất chậm (~20–30 KB/s), pip bị treo",
+      "Tải wheel từ mirror (khoảng 0,5 MB/s), đối chiếu SHA-256 từng file với metadata chính thức trên pypi.org, rồi cài offline từ thư mục wheelhouse"
+    ],
+    [
+      "Máy không có Docker",
+      "Dùng bản InfluxDB 2.7.11 cho Windows (file zip) cùng script start/setup; vẫn cung cấp docker-compose.yml cho máy có Docker"
+    ],
+    [
+      "Lux đọc sai (500 lux → khoảng 900 lux)",
+      "Tính ngược từ số đo cho thấy module Wokwi dùng điện trở 10 kΩ (mã ví dụ trong tài liệu dùng 2 kΩ, cho 5 V). Đã sửa công thức và lấy trung bình 16 lần đọc ADC; dữ liệu sai trước đó đã bị xóa"
+    ],
+    [
+      "Độ trễ ESP32 tăng dần tới khoảng 50 s",
+      "Đối chiếu uptime với giờ thực cho thấy đồng hồ mô phỏng bị trễ do Wokwi tạm dừng hoặc chạy chậm. Đã thêm sntp_set_sync_interval(60 s) và đo riêng độ lệch đồng hồ qua log Serial"
+    ],
+    [
+      "Gói đến trễ bị nhận nhầm là thiết bị khởi động lại",
+      "Chuyển tiêu chí từ uptime sang ts: seq lùi mà ts mới hơn mới là reset; bổ sung unit test"
+    ],
+    [
+      "pandas interpolate(limit=6) vẫn điền 6 ô đầu của khoảng trống dài",
+      "Tự tính độ dài từng chuỗi NaN, chỉ nội suy chuỗi ≤ 6 mẫu (có unit test)"
+    ],
+    [
+      "IQR xóa nhầm bước nhảy thật (vật cản, đổi thanh trượt Wokwi)",
+      "Dùng Z-score cửa sổ trượt làm mặc định, thêm min_spread và loại distance_cm khỏi lọc outlier"
+    ],
+    [
+      "Bản tin LWT offline của phiên cũ đến sau bản tin online của phiên mới",
+      "Dashboard xác định trạng thái theo độ mới của dữ liệu, không chỉ theo bản tin status"
+    ],
+    [
+      "Wokwi tạm dừng khi tab mô phỏng bị ẩn",
+      "Ghi chú trong README; khoảng trống được phản ánh qua completeness"
+    ]
+  ],
+  "conclusion": "Pipeline ESP32 → MQTT → gateway Python → InfluxDB → tiền xử lý → dashboard đã chạy ổn định trong buổi thực nghiệm. Hệ thống qua được các kịch bản gateway dừng và database dừng mà không mất dữ liệu, đồng thời phát hiện và ghi nhận đầy đủ các loại sự cố chất lượng. Kết quả đo cho thấy độ trễ chủ yếu do mạng tới broker công cộng. Muốn đo độ trễ chính xác thì đồng bộ thời gian là bắt buộc. Mã nguồn, cấu hình, unit test (9 test) và README hướng dẫn chạy nằm trong thư mục Bai2."
+}

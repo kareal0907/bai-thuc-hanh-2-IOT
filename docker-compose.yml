@@ -1,0 +1,25 @@
+# Tuy chon: chay InfluxDB (va Mosquitto noi bo) bang Docker thay cho scripts/start_influxdb.ps1.
+#   docker compose up -d
+# Sau do van chay: python -m gateway.setup_influx  (onboarding qua API, tao bucket + token).
+# Neu dung Mosquitto noi bo: sua [mqtt] host = "127.0.0.1" trong config.toml; ESP32 trong Wokwi
+# (VS Code) ket noi toi may tinh qua host "host.wokwi.internal".
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: lab2-influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    restart: unless-stopped
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: lab2-mosquitto
+    ports:
+      - "1883:1883"
+    command: ["mosquitto", "-c", "/mosquitto-no-auth.conf"]
+    restart: unless-stopped
+
+volumes:
+  influxdb-data:

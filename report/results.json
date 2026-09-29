@@ -1,0 +1,213 @@
+{
+  "latency": {
+    "esp32-01": {
+      "live": 312,
+      "backfill": 104,
+      "e2e_ms": {
+        "n": 312,
+        "mean": 2922.8,
+        "std": 956.4,
+        "min": 1869,
+        "p50": 2699.5,
+        "p95": 4876.5,
+        "p99": 6104.5,
+        "max": 9177
+      },
+      "ingest_ms": {
+        "n": 312,
+        "mean": 2916.0,
+        "std": 955.2,
+        "min": 1844,
+        "p50": 2691.0,
+        "p95": 4869.9,
+        "p99": 6094.3,
+        "max": 9171
+      },
+      "process_ms": {
+        "n": 312,
+        "mean": 0.4,
+        "std": 2.5,
+        "min": 0,
+        "p50": 0.0,
+        "p95": 1.0,
+        "p99": 4.0,
+        "max": 41
+      },
+      "write_ms": {
+        "n": 312,
+        "mean": 6.4,
+        "std": 6.0,
+        "min": 1,
+        "p50": 5.0,
+        "p95": 21.4,
+        "p99": 30.0,
+        "max": 51
+      }
+    },
+    "sim-01": {
+      "live": 519,
+      "backfill": 13,
+      "e2e_ms": {
+        "n": 519,
+        "mean": 672.7,
+        "std": 769.4,
+        "min": 282,
+        "p50": 469.0,
+        "p95": 1758.2,
+        "p99": 3619.6,
+        "max": 9708
+      },
+      "ingest_ms": {
+        "n": 519,
+        "mean": 664.6,
+        "std": 768.7,
+        "min": 275,
+        "p50": 462.0,
+        "p95": 1756.0,
+        "p99": 3612.6,
+        "max": 9701
+      },
+      "process_ms": {
+        "n": 519,
+        "mean": 0.5,
+        "std": 3.1,
+        "min": 0,
+        "p50": 0.0,
+        "p95": 1.0,
+        "p99": 13.6,
+        "max": 44
+      },
+      "write_ms": {
+        "n": 519,
+        "mean": 7.5,
+        "std": 6.5,
+        "min": 1,
+        "p50": 6.0,
+        "p95": 23.0,
+        "p99": 31.0,
+        "max": 38
+      }
+    }
+  },
+  "quality": {
+    "esp32-01": {
+      "stored_samples": 392,
+      "expected_by_seq": null,
+      "delivery_ratio": null,
+      "null_values": {
+        "temperature": 0,
+        "humidity": 0,
+        "light_lux": 0,
+        "distance_cm": 0
+      },
+      "events": {
+        "reset": 4
+      }
+    },
+    "sim-01": {
+      "stored_samples": 545,
+      "expected_by_seq": 560,
+      "delivery_ratio": 0.9732,
+      "null_values": {
+        "temperature": 7,
+        "humidity": 4,
+        "light_lux": 4,
+        "distance_cm": 3
+      },
+      "events": {
+        "bad_json": 2,
+        "device_id_mismatch": 1,
+        "duplicate": 12,
+        "gap": 17,
+        "null": 16,
+        "out_of_order": 4,
+        "out_of_range": 3
+      }
+    }
+  },
+  "storage": {
+    "engine_total_bytes": 100744102,
+    "iot_raw": {
+      "retention_days": 30,
+      "field_values": 6541,
+      "tsm_bytes": 31809,
+      "wal_bytes": 0,
+      "disk_bytes": 33590070,
+      "data_bytes": 31809,
+      "bytes_per_value": 4.86
+    },
+    "iot_processed": {
+      "retention_days": 365,
+      "field_values": 2058,
+      "tsm_bytes": 16784,
+      "wal_bytes": 0,
+      "disk_bytes": 33575098,
+      "data_bytes": 16784,
+      "bytes_per_value": 8.16
+    },
+    "iot_ops": {
+      "retention_days": 7,
+      "field_values": 4893,
+      "tsm_bytes": 19405,
+      "wal_bytes": 0,
+      "disk_bytes": 33578934,
+      "data_bytes": 19405,
+      "bytes_per_value": 3.97
+    }
+  },
+  "broker_rtt_ms": {
+    "host": "broker.emqx.io",
+    "ip": "44.232.241.40",
+    "n": 20,
+    "mean": 266.6,
+    "std": 32.4,
+    "min": 239,
+    "p50": 256.5,
+    "p95": 316.6,
+    "p99": 367.5,
+    "max": 380
+  },
+  "window": {
+    "start": "2026-09-29T06:47:00Z",
+    "stop": "2026-09-29T07:34:41Z",
+    "generated": "2026-09-29 14:36:28"
+  },
+  "benchmark": {
+    "single_point_write": {
+      "points": 300,
+      "seconds": 0.652,
+      "points_per_s": 460.2,
+      "ms_per_write": 2.17
+    },
+    "batch_100_write": {
+      "points": 50000,
+      "seconds": 2.492,
+      "points_per_s": 20060.4
+    },
+    "batch_1000_write": {
+      "points": 50000,
+      "seconds": 1.437,
+      "points_per_s": 34786.4
+    },
+    "batch_5000_write": {
+      "points": 50000,
+      "seconds": 1.311,
+      "points_per_s": 38146.2
+    },
+    "query_raw_1_device_50k": {
+      "rows": 50000,
+      "best_ms": 715.2
+    },
+    "query_mean_1m_window": {
+      "rows": 45,
+      "best_ms": 12.8
+    },
+    "query_pivot_5_fields": {
+      "rows": 50000,
+      "best_ms": 1245.4
+    },
+    "bench_values": 751500,
+    "bench_tsm_bytes": 2305579,
+    "bench_bytes_per_value": 3.068
+  }
+}

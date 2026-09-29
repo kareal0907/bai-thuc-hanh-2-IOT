@@ -1,0 +1,63 @@
+# Cau hinh chung cho gateway (collector), tien xu ly va dashboard.
+# Sao chep thanh config.toml (scripts/setup_influx.py tu tao va dien token).
+
+[mqtt]
+host = "broker.emqx.io"
+port = 1883
+tls = false                 # true + port = 8883 de ma hoa kenh gateway <-> broker
+username = ""
+password = ""
+# Cau truc topic: <topic_root>/<site_id>/<device_id>/<kieu>. Phai trung voi firmware.
+topic_root = "int14149/lab2"
+qos = 1
+client_id_prefix = "lab2-collector"
+
+[influx]
+url = "http://127.0.0.1:8086"
+org = "iot-lab"
+token = "DIEN_TOKEN_SAU_KHI_CHAY_setup_influx.py"
+bucket_raw = "iot_raw"              # du lieu tho, luu 30 ngay
+bucket_processed = "iot_processed"  # du lieu da tien xu ly, luu 365 ngay
+bucket_ops = "iot_ops"              # do tre + chat luong du lieu, luu 7 ngay
+retention_raw_days = 30
+retention_processed_days = 365
+retention_ops_days = 7
+
+[validation]
+# Dai do hop le cua cam bien (datasheet DHT22, HC-SR04, LDR Wokwi).
+temperature = [-40.0, 80.0]
+humidity = [0.0, 100.0]
+light_lux = [0.0, 100000.0]
+distance_cm = [2.0, 400.0]
+rssi = [-120, 0]
+# Lech gio cho phep giua ts thiet bi va gio gateway; vuot nguong => dung gio gateway (ms).
+max_future_ms = 60000        # ts o tuong lai => dong ho thiet bi sai
+max_past_ms = 900000         # 15 phut > 10 phut bo dem store-and-forward cua firmware
+
+[collector]
+spool_file = "data/spool.jsonl"   # bo dem khi InfluxDB loi, tu ghi bu khi co ket noi lai
+dedup_cache = 5000                # so khoa (device_id, seq, ts) nho de loai trung
+stats_interval_s = 30
+
+[preprocess]
+expected_interval_s = 5     # chu ky gui cua thiet bi
+max_interp_gap = 6          # chi noi suy khoang trong <= 6 mau (30 s)
+# "zscore" = Z-score tren cua so truot (bam theo xu huong, khong xoa nham thay doi bac thang);
+# "iqr" = IQR toan khoang (don gian, hop voi du lieu dung, it xu huong).
+outlier_method = "zscore"
+# distance_cm khong loc outlier: vat can xuat hien la su kien that (dang bac thang),
+# IQR/Z-score se xoa nham cac muc do nay.
+outlier_fields = ["temperature", "humidity", "light_lux"]
+iqr_k = 1.5
+z_threshold = 3.0
+z_window = 60               # cua so truot cho Z-score (so mau)
+resample = "1min"
+rolling_windows = 5         # rolling mean tren 5 cua so resample
+
+[preprocess.min_spread]
+# Do phan tan toi thieu (IQR / do lech chuan) - tranh chia cho 0 khi du lieu gan nhu
+# khong doi (vd. slider Wokwi dung yen), luc do moi thay doi nho deu bi coi la outlier.
+temperature = 0.5
+humidity = 2.0
+light_lux = 20.0
+distance_cm = 2.0
