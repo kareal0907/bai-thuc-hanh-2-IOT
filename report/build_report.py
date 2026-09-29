@@ -5,6 +5,7 @@ Dau vao: report/results.json (gateway.evaluate), report/experiment.json (experim
 Chay:    python report/build_report.py   -> report/Bao_cao_Bai_2_IoT.docx
 """
 import json
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -22,6 +23,9 @@ FIG = HERE / "figures"
 R = json.loads((HERE / "results.json").read_text(encoding="utf-8"))
 X = json.loads((HERE / "experiment.json").read_text(encoding="utf-8"))
 P = json.loads((BASE / "data" / "preprocess_report.json").read_text(encoding="utf-8"))
+STUDENT = "Phạm Trung Huy"
+STUDENT_ID = "B23DCAT132"
+REPO_URL = "https://github.com/kareal0907/bai-thuc-hanh-2-IOT"
 FONT = "Times New Roman"
 ACCENT = RGBColor(0x1F, 0x3A, 0x68)
 
@@ -49,6 +53,31 @@ for level, size in ((1, 13.5), (2, 12)):
     st.paragraph_format.space_before = Pt(8 if level == 1 else 5)
     st.paragraph_format.space_after = Pt(3)
     st.paragraph_format.keep_with_next = True
+
+
+def add_link(paragraph, url, text=None, size=None):
+    """Chen hyperlink bam duoc (python-docx khong co san API cho hyperlink)."""
+    r_id = paragraph.part.relate_to(url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/"
+                                         "hyperlink", is_external=True)
+    link = OxmlElement("w:hyperlink")
+    link.set(qn("r:id"), r_id)
+    run = OxmlElement("w:r")
+    rpr = OxmlElement("w:rPr")
+    for tag, val in (("w:color", "0563C1"), ("w:u", "single")):
+        el = OxmlElement(tag)
+        el.set(qn("w:val"), val)
+        rpr.append(el)
+    if size:
+        sz = OxmlElement("w:sz")
+        sz.set(qn("w:val"), str(int(size * 2)))
+        rpr.append(sz)
+    run.append(rpr)
+    t = OxmlElement("w:t")
+    t.text = text or url
+    run.append(t)
+    link.append(run)
+    paragraph._p.append(link)
+    return paragraph
 
 
 def para(text="", bold_prefix=None, size=None, align=None, italic=False, after=None):
@@ -175,10 +204,10 @@ t.runs[0].bold = True
 t.runs[0].font.color.rgb = ACCENT
 t = para("THU THẬP, LƯU TRỮ VÀ TIỀN XỬ LÝ DỮ LIỆU IoT", size=13.5, align=WD_ALIGN_PARAGRAPH.CENTER, after=4)
 t.runs[0].bold = True
-para("Học phần: IoT và Ứng dụng (INT14149)   ·   Sinh viên: ............................   ·   MSSV: ...............",
+para(f"Học phần: IoT và Ứng dụng (INT14149)   ·   Sinh viên: {STUDENT}   ·   MSSV: {STUDENT_ID}",
      size=10.5, align=WD_ALIGN_PARAGRAPH.CENTER, after=0)
-para(f"Ngày thực nghiệm: {X['date']}   ·   Mã nguồn: thư mục Bai2 (firmware, gateway, tests, README)",
-     size=10.5, align=WD_ALIGN_PARAGRAPH.CENTER, after=6)
+add_link(para(f"Ngày thực nghiệm: {X['date']}   ·   Mã nguồn (GitHub): ", size=10.5,
+              align=WD_ALIGN_PARAGRAPH.CENTER, after=6), REPO_URL, size=10.5)
 
 # ---------------- 1. Kien truc ----------------
 doc.add_heading("1. Kiến trúc hệ thống", level=1)
@@ -341,8 +370,10 @@ for head, text in X["improvements"]:
 doc.add_heading("8. Khó khăn và cách giải quyết", level=1)
 table(["Khó khăn", "Cách giải quyết"], X["difficulties"], [6.0, 11.0], size=9)
 doc.add_heading("9. Kết luận", level=1)
-para(X["conclusion"])
+para(X["conclusion"].replace("nằm trong thư mục Bai2.", "được lưu tại repo GitHub công khai: "),
+     align=WD_ALIGN_PARAGRAPH.LEFT)
+add_link(doc.paragraphs[-1], REPO_URL)
 
-out = HERE / "Bao_cao_Bai_2_IoT.docx"
+out = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / "Bao_cao_Bai_2_IoT.docx"
 doc.save(out)
 print("saved", out)
