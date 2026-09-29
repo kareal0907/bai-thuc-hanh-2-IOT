@@ -234,11 +234,3 @@ powershell -ExecutionPolicy Bypass -File scripts\download_influxdb.ps1
 ```
 
 Sau đó làm theo mục 3 (cần chạy `setup_influx` vì database mới trống).
-
-Cập nhật lên GitHub sau khi sửa:
-
-```powershell
-git add -A
-git commit -m "Mo ta thay doi"
-git push
-```
