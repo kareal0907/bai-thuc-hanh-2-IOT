@@ -206,8 +206,9 @@ Nguyên tắc thiết kế:
 
 `device_sim.py` dùng chung đồng hồ với gateway nên cho số đo chính xác. Với ESP32 trên Wokwi, số đo còn gồm sai số đồng hồ:
 
-- Wokwi mô phỏng chậm hơn thời gian thực (khoảng 89% trong thực nghiệm).
-- Nếu chỉ đồng bộ NTP một lần, đồng hồ ESP32 trôi khoảng 10%: sau vài phút, "độ trễ" đo được đã lên tới hàng chục giây.
+- Wokwi chạy khoảng 98% tốc độ thực khi mô phỏng liên tục, nhưng tạm dừng khi tab bị ẩn. Tính cả các lần dừng, đồng hồ ESP32 chỉ chạy khoảng 95% thời gian thực.
+- Nếu chỉ đồng bộ NTP một lần, độ lệch này tích lũy: sau vài phút, "độ trễ" đo được đã lên tới hàng chục giây.
+- Kể cả khi đã đồng bộ lại, đồng hồ ESP32 trong Wokwi vẫn chậm hơn máy tính khoảng 2 s. Báo cáo đo phần này qua log Serial và trừ ra.
 
 Firmware vì vậy đồng bộ lại NTP mỗi 60 giây (`NTP_RESYNC_MS`). Wokwi cũng **tạm dừng mô phỏng khi tab bị ẩn**, nên hãy giữ tab mô phỏng hiển thị khi thu số liệu.
 
@@ -219,15 +220,25 @@ Firmware vì vậy đồng bộ lại NTP mỗi 60 giây (`NTP_RESYNC_MS`). Wokw
 - **Wokwi báo `Waiting for NTP time`**: đợi vài chu kỳ; firmware chỉ gửi dữ liệu khi đã có giờ chuẩn.
 - **Wokwi `rc=-2`**: broker không truy cập được. Kiểm tra mạng, hoặc đổi sang `broker.hivemq.com` ở cả firmware và config.
 
-## 10. Đẩy lên GitHub
+## 10. GitHub
 
-`.gitignore` đã loại `config.toml` (có token), `data/` và `tools/`. Máy hiện chưa cài git; sau khi cài [Git for Windows](https://git-scm.com/download/win):
+Mã nguồn được lưu tại https://github.com/kareal0907/bai-thuc-hanh-2-IOT. `.gitignore` đã loại `config.toml` (chứa token), `data/` (dữ liệu chạy thử, tài khoản InfluxDB) và `tools/`.
+
+Chạy trên máy khác:
 
 ```powershell
-cd "D:\Bài 1 TH IOT\Bai2"
-git init
-git add .
-git commit -m "Bai thuc hanh 2: MQTT -> InfluxDB -> tien xu ly -> dashboard"
-git remote add origin https://github.com/<tai-khoan>/<repo>.git
-git push -u origin main
+git clone https://github.com/kareal0907/bai-thuc-hanh-2-IOT.git
+cd bai-thuc-hanh-2-IOT
+python -m pip install -r requirements.txt
+powershell -ExecutionPolicy Bypass -File scripts\download_influxdb.ps1
+```
+
+Sau đó làm theo mục 3 (cần chạy `setup_influx` vì database mới trống).
+
+Cập nhật lên GitHub sau khi sửa:
+
+```powershell
+git add -A
+git commit -m "Mo ta thay doi"
+git push
 ```
